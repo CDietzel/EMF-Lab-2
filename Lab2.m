@@ -60,6 +60,13 @@ potentialcutline = potentials(h/2, :);
 electriccutline = gradmag(h/2, :);
 
 figure;
+%contour(potentials);
+imagesc(potentials);
+hold on;
+c = colorbar;%adds color legend
+c.Label.String = 'Potential (V)';
+title('Simulated Potential Field')
+figure;
 contour(potentials);
 %imagesc(potentials);
 hold on;
