@@ -4,12 +4,12 @@ clear variables globals;
 
 %=========================================================================
 % ALTER THE FOLLOWING VARIABLES TO DEFINE THE PARAMETERS OF THE SIMULATION
-a = 10;%radius of the conducting rods
-d = 20;%distance from the center of the conducting rods to the y axis
-l = 100;%length of the simulation matrix
-h = 100;%height of the simulation matrix
-V = 5;%voltage of the conducting rods
-numiter = 1000;%number of iterations of the finite difference method
+a = 5;%radius of the conducting rods
+d = 10;%distance from the center of the conducting rods to the y axis
+l = 50;%length of the simulation matrix
+h = 50;%height of the simulation matrix
+V = 1;%voltage of the conducting rods
+numiter = 10000;%number of iterations of the finite difference method
 %=========================================================================
 
 zeromatrix = zeros(l, h);%create matrix of zeros of size lxh
@@ -42,8 +42,9 @@ laplacefilter = [0 0.25 0; 0.25 0 0.25; 0 0.25 0];
 %positive/negative V, and the border of the simulation area having voltage
 %of 0.
 potentials = fixednodes;
-
-for i = 1:numiter
+oldpotentials = zeromatrix;
+while max(max(abs(potentials-oldpotentials))) > 0.001
+    oldpotentials = potentials;
     %continuously applies equation 15.16 to the matrix of potentials, and
     %then reapplies the "fixed" voltages afterwards to make sure that the
     %specified voltage conditions are maintained. Repeats this process
@@ -53,7 +54,31 @@ for i = 1:numiter
     potentials = potentials + fixednodes;
 end
 
-imagesc(potentials);%displays the final simulation results
+[ex, ey] = gradient(-potentials);
+[gradmag, graddir] = imgradient(-potentials);
+potentialcutline = potentials(h/2, :);
+electriccutline = gradmag(h/2, :);
+
+figure;
+contour(potentials);
+%imagesc(potentials);
+hold on;
+quiver(ex, ey);
+hold off;
 c = colorbar;%adds color legend
 c.Label.String = 'Potential (V)';
-title('Simulated Potential Field')
+title('Simulated Potential/Electric Field')
+xlabel('X Position');
+ylabel('Y Position');
+figure;
+plot(potentialcutline);
+hold on;
+title('Cutline of Potential Field Along X-Axis');
+ylabel('Potential Magnitude (V)');
+xlabel('X Position');
+figure;
+plot(electriccutline);
+hold on;
+title('Cutline of Electric Field Magnitude Along X-Axis');
+ylabel('Electric Field Magnitude (V)');
+xlabel('X Position');
